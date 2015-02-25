@@ -165,10 +165,15 @@ public class Convoy {
 		return leftOpen || rightOpen;
 	}
 	
+	public boolean isClosed(){
+		return !isOpen();
+	}
+	
 	public void setClosed(){
 		leftOpen=false;
 		rightOpen=false;
 	}
+	
 
 	@Override
 	public boolean equals(Object obj) {

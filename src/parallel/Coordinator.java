@@ -37,7 +37,7 @@ public class Coordinator {
 	@Test
 	public void testParallelVcoda() throws IOException{
 		VpccList = runParallelVcoda();
-		
+		Vpcc = runVcoda();
 		for(List<Convoy> V:VpccList){
 			for(Convoy v:V){
 				VpccMerge.add(v);
@@ -48,80 +48,23 @@ public class Coordinator {
 		VpccMerge = newMerge(VpccMerge,1);
 		System.out.println("Convoys Count = "+VpccMerge.size());
 		System.out.println("Total comparison ops = "+ count);
+		
+		filterClosedConvoysinMerge(VpccMerge, Vpcc);
+		System.out.println("**************Vpccn Remaining Convoys*************");
+		printConvoyList(VpccMerge);
+		System.out.println("**************Vpcc Remaining Convoys*************");
+		printConvoyList(Vpcc);
+		System.out.println("**************End*************");
+//		System.out.println("Total comparison ops = "+ count);
 	}
 	
 	private List<Convoy> newMerge(List<Convoy> Vpcc,int iteration){
-		List<Convoy> VpccResult = new ArrayList<Convoy>();
-		List<Convoy> VpccNext = new ArrayList<Convoy>();
-		System.out.println("Iteration#"+iteration+", input convoys = "+Vpcc.size());
-		
-		List<Convoy> VpccLeft = new ArrayList<Convoy>();
-		List<Convoy> VpccRight = new ArrayList<Convoy>();
-		
+		List<Convoy> result=null;
+		PseudoReducer reducer = new PseudoReducer(m,k);
 		for(Convoy v:Vpcc){
-			if(v.isLeftOpen()){
-				VpccRight.add(v);
-			}
-			else if(v.isRightOpen()){
-				VpccLeft.add(v);
-			}
-			else{
-				VpccResult.add(v);
-			}
+			reducer.reduce(v);
 		}
-		//******************Here the assumption is that both the lists are sorted************************
-		
-		for(int i=0; i<Vpcc.size(); i++){
-			Convoy v1 = Vpcc.get(i);
-//			System.out.println("i="+i);
-			for(int j=i+1; j<Vpcc.size(); j++){count++;
-				Convoy v2 = Vpcc.get(j);
-//				if(v1.getStartTime()==1337 && v1.getEndTime()==1600){
-//					System.out.println("i="+i+"::j="+j);
-//				}
-				if(v1.isRightOpen()){
-					if( v2.getStartTime()<=v1.getEndTime()+1 && v1.getEndTime()<v2.getEndTime() && v1.intersection(v2).size()>=m){
-						//merge two convoys
-						v1.setExtended(true);
-						Convoy vext = new Convoy(v1.intersection(v2),v1.getStartTime(),v2.getEndTime());
-						vext.setLeftOpen(v1.isLeftOpen());vext.setRightOpen(v2.isRightOpen());
-						if(vext.isLeftOpen() || vext.isRightOpen()){
-							VpccNext = updateVpccResult(VpccNext, vext);
-						}
-						else if(vext.lifetime()>=k){
-							VpccResult = updateVpccResult(VpccResult, vext);
-						}
-						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
-					}
-				}
-				if(v1.isLeftOpen()){
-					if( v2.getStartTime()<v1.getStartTime() && v1.getStartTime()<=v2.getEndTime()+1 && v1.intersection(v2).size()>=m){
-						//merge two convoys
-						System.out.println("Came to left open");
-						Convoy vext = new Convoy(v1.intersection(v2),v2.getStartTime(),v1.getEndTime());
-						vext.setLeftOpen(v2.isLeftOpen());vext.setRightOpen(v1.isRightOpen());
-						if(vext.isOpen()){
-							VpccNext = updateVpccResult(VpccNext, vext);
-						}
-						else if(vext.lifetime()>=k){
-							VpccResult = updateVpccResult(VpccResult, vext);
-						}
-						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
-					}
-				}
-			}
-			if(!v1.isAbsorbed() && v1.lifetime() >= k){
-				v1.setClosed();
-				VpccResult = updateVpccResult(VpccResult, v1);
-			}
-		}
-		if(VpccNext.size()>0){
-			VpccNext = finalMerge(VpccNext,++iteration);
-			for(Convoy v:VpccNext){
-				VpccResult = updateVpccResult(VpccResult,v);
-			}
-		}
-		return VpccResult;
+		return reducer.finalMerge();
 	}
 	
 	@Test
@@ -275,7 +218,7 @@ public class Coordinator {
 		}
 		for(Convoy v:toRemove){VpccResult.remove(v);}
 		for(Convoy v:toAdd){VpccResult.add(v);}
-		
+
 		return VpccResult;
 	}
 	private void printConvoys(List<List<Convoy>> VpccList){
@@ -327,7 +270,7 @@ public class Coordinator {
 			System.out.println(clusterMap.size());
 			int minTime=Collections.min(clusterMap.keySet());
 			int maxTime=Collections.max(clusterMap.keySet());
-			List<Convoy> Vpcc = VcodaNode.PCCDNode(clusterMap,k,m,minTime,maxTime,1,2874);
+			List<Convoy> Vpcc = VcodaNode.PCCDNode(clusterMap,k,m,minTime,maxTime,58,2874);
 			VpccList.add(Vpcc);
 			
 			//*******Print Vpcc************
