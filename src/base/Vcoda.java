@@ -19,6 +19,7 @@ import clustering.PointWrapper;
 
 public class Vcoda {
 	static String inputFilePath="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/trucks273s.txt";
+	static String inputFilePath1="D:/data/scaled";
 	static String outputFilePath="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/convoysOutput.txt";
 	static int m=3;
 	static double e=0.0006; // Range: 1/10^4 to 6/10^4
@@ -30,7 +31,7 @@ public class Vcoda {
 
 	public static void main(String[] args) throws IOException {
 		
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = DbscanFile.DBSCAN(inputFilePath, m-1, e);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath1, m-1, e, 2);
 		
 		//*****************Apply PCCD algo on the list of clusters**************************************
 		List<Convoy> Vpcc = PCCD(clusterMap,k,m);

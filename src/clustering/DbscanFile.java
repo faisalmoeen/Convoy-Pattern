@@ -1,5 +1,6 @@
 package clustering;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,15 +20,39 @@ import utils.Utils;
 
 public class DbscanFile {
 
+	private HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new HashMap<Integer,List<Cluster<PointWrapper>>>();
 	public DbscanFile() {
 	}
 	
-	public static HashMap<Integer, List<Cluster<PointWrapper>>> DBSCAN(String inputFilePath,int m, double e) {
+	public HashMap<Integer, List<Cluster<PointWrapper>>> DBSCAN(String inputFilePath,int m, double e, int numFiles) throws FileNotFoundException {
+		File file = new File(inputFilePath);
+		int count=0;
+		if(!file.exists()){
+			throw new FileNotFoundException(inputFilePath);
+		}
+		if(file.isDirectory()){
+			File[] files = file.listFiles();
+			for(File f:files){
+				clusterFile(f,m,e);
+				count++;
+				if(count==numFiles){
+					break;
+				}
+			}
+		}
+		else{
+			clusterFile(file,m,e);
+		}
+		
+		
+		return clusterMap;
+	}
+	
+	private void clusterFile(File f,int m, double e){
 		Reader csvData = null;
 		try {
-			csvData = new FileReader(inputFilePath);
+			csvData = new FileReader(f);
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		Iterable<CSVRecord> records = null;
@@ -43,7 +68,7 @@ public class DbscanFile {
 		int currentTime=-1;
 		List<PointWrapper> clusterInput = new ArrayList<PointWrapper>();
 		DBSCANClusterer<PointWrapper> dbscan = new DBSCANClusterer<PointWrapper>(e, m);
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new HashMap<Integer,List<Cluster<PointWrapper>>>();
+		
 		int t=0;
 		
 		for (CSVRecord record : records) {
@@ -76,6 +101,5 @@ public class DbscanFile {
 			System.out.println("clustering done");
 			clusterMap.put(currentTime, clusterResults);
 		}
-		return clusterMap;
 	}
 }

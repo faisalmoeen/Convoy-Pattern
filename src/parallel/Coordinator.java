@@ -24,7 +24,7 @@ public class Coordinator {
 	static String outputFolder="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/partitions_output";
 	static int m=3;
 	static double e=0.0006; // Range: 1/10^4 to 6/10^4
-	static int k=2;
+	static int k=180;
 //	static int partitionSize=500;
 	static List<List<Convoy>> VpccList=null;
 	static List<Convoy> Vpcc = null;
@@ -32,6 +32,96 @@ public class Coordinator {
 	int count=0;
 	public Coordinator() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Test
+	public void testParallelVcoda() throws IOException{
+		VpccList = runParallelVcoda();
+		
+		for(List<Convoy> V:VpccList){
+			for(Convoy v:V){
+				VpccMerge.add(v);
+			}
+		}
+		
+		System.out.println("No. of convoys before merge = "+VpccMerge.size());
+		VpccMerge = newMerge(VpccMerge,1);
+		System.out.println("Convoys Count = "+VpccMerge.size());
+		System.out.println("Total comparison ops = "+ count);
+	}
+	
+	private List<Convoy> newMerge(List<Convoy> Vpcc,int iteration){
+		List<Convoy> VpccResult = new ArrayList<Convoy>();
+		List<Convoy> VpccNext = new ArrayList<Convoy>();
+		System.out.println("Iteration#"+iteration+", input convoys = "+Vpcc.size());
+		
+		List<Convoy> VpccLeft = new ArrayList<Convoy>();
+		List<Convoy> VpccRight = new ArrayList<Convoy>();
+		
+		for(Convoy v:Vpcc){
+			if(v.isLeftOpen()){
+				VpccRight.add(v);
+			}
+			else if(v.isRightOpen()){
+				VpccLeft.add(v);
+			}
+			else{
+				VpccResult.add(v);
+			}
+		}
+		//******************Here the assumption is that both the lists are sorted************************
+		
+		for(int i=0; i<Vpcc.size(); i++){
+			Convoy v1 = Vpcc.get(i);
+//			System.out.println("i="+i);
+			for(int j=i+1; j<Vpcc.size(); j++){count++;
+				Convoy v2 = Vpcc.get(j);
+//				if(v1.getStartTime()==1337 && v1.getEndTime()==1600){
+//					System.out.println("i="+i+"::j="+j);
+//				}
+				if(v1.isRightOpen()){
+					if( v2.getStartTime()<=v1.getEndTime()+1 && v1.getEndTime()<v2.getEndTime() && v1.intersection(v2).size()>=m){
+						//merge two convoys
+						v1.setExtended(true);
+						Convoy vext = new Convoy(v1.intersection(v2),v1.getStartTime(),v2.getEndTime());
+						vext.setLeftOpen(v1.isLeftOpen());vext.setRightOpen(v2.isRightOpen());
+						if(vext.isLeftOpen() || vext.isRightOpen()){
+							VpccNext = updateVpccResult(VpccNext, vext);
+						}
+						else if(vext.lifetime()>=k){
+							VpccResult = updateVpccResult(VpccResult, vext);
+						}
+						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
+					}
+				}
+				if(v1.isLeftOpen()){
+					if( v2.getStartTime()<v1.getStartTime() && v1.getStartTime()<=v2.getEndTime()+1 && v1.intersection(v2).size()>=m){
+						//merge two convoys
+						System.out.println("Came to left open");
+						Convoy vext = new Convoy(v1.intersection(v2),v2.getStartTime(),v1.getEndTime());
+						vext.setLeftOpen(v2.isLeftOpen());vext.setRightOpen(v1.isRightOpen());
+						if(vext.isOpen()){
+							VpccNext = updateVpccResult(VpccNext, vext);
+						}
+						else if(vext.lifetime()>=k){
+							VpccResult = updateVpccResult(VpccResult, vext);
+						}
+						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
+					}
+				}
+			}
+			if(!v1.isAbsorbed() && v1.lifetime() >= k){
+				v1.setClosed();
+				VpccResult = updateVpccResult(VpccResult, v1);
+			}
+		}
+		if(VpccNext.size()>0){
+			VpccNext = finalMerge(VpccNext,++iteration);
+			for(Convoy v:VpccNext){
+				VpccResult = updateVpccResult(VpccResult,v);
+			}
+		}
+		return VpccResult;
 	}
 	
 	@Test
@@ -60,6 +150,7 @@ public class Coordinator {
 		System.out.println("Total comparison ops = "+ count);
 	}
 	
+
 	private List<Convoy> finalMerge(List<Convoy> Vpcc,int iteration){
 		List<Convoy> VpccResult = new ArrayList<Convoy>();
 		List<Convoy> VpccNext = new ArrayList<Convoy>();
@@ -227,7 +318,7 @@ public class Coordinator {
 		List<List<Convoy>> VpccList = new ArrayList<List<Convoy>>();
 		for(String file:f.list()){
 			String inputFilePath = inputFolder+"/"+file;
-			HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = DbscanFile.DBSCAN(inputFilePath, m-1, e);
+			HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath, m-1, e,1);
 			
 			//*****************Apply PCCDNode algo on the list of clusters**************************************
 			if(clusterMap.size()==0){
@@ -305,7 +396,7 @@ public class Coordinator {
 	}
 	
 	public List<Convoy> runVcoda() throws IOException{
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = DbscanFile.DBSCAN(inputFilePathVcoda, m-1, e);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePathVcoda, m-1, e,1);
 
 		//*****************Apply PCCD algo on the list of clusters**************************************
 		List<Convoy> Vpcc = Vcoda.PCCD(clusterMap,k,m);

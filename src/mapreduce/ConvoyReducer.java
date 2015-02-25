@@ -1,3 +1,4 @@
+package mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -154,7 +155,7 @@ public class ConvoyReducer extends Reducer<IntWritable,Text,Text,IntWritable> {
 	
 	
 	public List<Convoy> runVcoda() throws IOException{
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = DbscanFile.DBSCAN(inputFilePathVcoda, m-1, e);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePathVcoda, m-1, e, 1);
 
 		//*****************Apply PCCD algo on the list of clusters**************************************
 		List<Convoy> Vpcc = Vcoda.PCCD(clusterMap,k,m);
