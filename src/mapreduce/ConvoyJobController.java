@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class WordCount {
+public class ConvoyJobController {
 
 
   public static void main(String[] args) throws Exception {
@@ -21,19 +21,22 @@ public class WordCount {
 		FileUtils.deleteDirectory(out);
 	}
     Configuration conf = new Configuration();
-    conf.set("m", "3");
-    conf.set("k", "10");
-    conf.set("e", "0.0006");
-    Job job = Job.getInstance(conf, "word count");
-    job.setJarByClass(WordCount.class);
-    job.setMapperClass(ConvoyMapper.class);
+//    conf.set("m", "3");
+//    conf.set("k", "180");
+//    conf.set("e", "0.0006");
+    conf.set("m", args[2]);
+    conf.set("k", args[3]);
+    conf.set("e", args[4]);
+    Job job = Job.getInstance(conf, "Distributed Convoy");
+    job.setJarByClass(ConvoyJobController.class);
+    job.setMapperClass(ConvoyMapperOptim.class);
 //    job.setCombinerClass(IntSumReducer.class);
-    job.setReducerClass(ConvoyReducer.class);
-//    job.setNumReduceTasks(0);
+    job.setReducerClass(ConvoyReducerOptim.class);
+    job.setNumReduceTasks(1);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(Text.class);
     for(String s:f.list()){
-    	MultipleInputs.addInputPath(job,new Path(args[0]+"/"+s),TextInputFormat.class,ConvoyMapper.class);
+    	MultipleInputs.addInputPath(job,new Path(args[0]+"/"+s),TextInputFormat.class,ConvoyMapperOptim.class);
     }
 //    FileInputFormat.addInputPath(job, new Path(args[0]));
     FileOutputFormat.setOutputPath(job, new Path(args[1]));

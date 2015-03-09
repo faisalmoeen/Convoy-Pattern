@@ -9,27 +9,31 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Reducer.Context;
 
+import parallel.PseudoReducer;
 import utils.Utils;
 import clustering.DbscanFile;
 import clustering.PointWrapper;
 import base.Convoy;
 import base.Vcoda;
 
-public class ConvoyReducerOptim extends Reducer<IntWritable,Text,Text,IntWritable> {
+public class ConvoyReducerOptim extends Reducer<IntWritable,Text,IntWritable,Text> {
 
 	private IntWritable one = new IntWritable(1);
 	private int m;
 	private int k;
 	private double e = 0.0006;
 	private Convoy v;
-
+	private PseudoReducer reducer;
+	private List<Convoy> result=null;
 	static String inputFilePathVcoda="/media/mynewdrive/research-data/vcoda-inputs/trucks273s.txt";
 	static String outputFilePathVcoda="/media/mynewdrive/research-data/vcoda-results/convoysOutput.txt";
 	
 	List<Convoy> VpccVcoda;
 	List<Convoy> VpccMerge = new ArrayList<Convoy>();
 	
+	int reducerCount=0;
 	int count=0;
 	@Override
 	protected void setup(Context context) throws IOException,
@@ -37,10 +41,12 @@ public class ConvoyReducerOptim extends Reducer<IntWritable,Text,Text,IntWritabl
 		Configuration conf = context.getConfiguration();
 		m = Integer.parseInt(conf.get("m"));
 		k = Integer.parseInt(conf.get("k"));
+		reducer = new PseudoReducer(m, k);
 		super.setup(context);
 	}
 
 	public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+		reducerCount++;
 		int count = 0;
 		for (Text val : values) {
 			System.out.println(val);
@@ -49,83 +55,47 @@ public class ConvoyReducerOptim extends Reducer<IntWritable,Text,Text,IntWritabl
 //				context.write(val, one);
 //			}
 //			else{
-				VpccMerge.add(v);
+				reducer.reduce(v);
 				count++;
 //			}
 		}
 		System.out.println("Convoys received at reducer = "+count);
-		List<Convoy> VpccVcoda = runVcoda();
-		filterClosedConvoysinMerge(VpccMerge, VpccVcoda);
-		System.out.println("After removing closed convoys = "+VpccMerge.size());
-		VpccMerge = finalMerge(VpccMerge, 1);
-		System.out.println("After final merge = "+VpccMerge.size());
-		filterClosedConvoysinMerge(VpccMerge, VpccVcoda);
-		System.out.println("After filtering = "+VpccMerge.size());
-		System.out.println("**************Vpccn Remaining Convoys*************");
-		printConvoyList(VpccMerge);
-		System.out.println("**************Vpcc Remaining Convoys*************");
-		printConvoyList(VpccVcoda);
+//		List<Convoy> VpccVcoda = runVcoda();
+//		filterClosedConvoysinMerge(VpccMerge, VpccVcoda);
+//		System.out.println("After removing closed convoys = "+VpccMerge.size());
+//		VpccMerge = finalMerge(VpccMerge, 1);
+//		System.out.println("After final merge = "+VpccMerge.size());
+//		filterClosedConvoysinMerge(VpccMerge, VpccVcoda);
+//		System.out.println("After filtering = "+VpccMerge.size());
+//		System.out.println("**************Vpccn Remaining Convoys*************");
+//		printConvoyList(VpccMerge);
+//		System.out.println("**************Vpcc Remaining Convoys*************");
+//		printConvoyList(VpccVcoda);
 		System.out.println("**************End*************");
 		System.out.println("Total comparison ops during merge = "+count);
 	}
 	
-	private List<Convoy> finalMerge(List<Convoy> Vpcc,int iteration){
-		List<Convoy> VpccResult = new ArrayList<Convoy>();
-		List<Convoy> VpccNext = new ArrayList<Convoy>();
-		System.out.println("Iteration#"+iteration+", input convoys = "+Vpcc.size());
-		for(int i=0; i<Vpcc.size(); i++){
-			Convoy v1 = Vpcc.get(i);
-//			System.out.println("i="+i);
-			for(int j=i+1; j<Vpcc.size(); j++){count++;
-				Convoy v2 = Vpcc.get(j);
-				if((v1.getStartTime()==185 && v1.getEndTime()==500) || (v1.getStartTime()==501 && v1.getEndTime()==836)){// && v1.getEndTime()==1600){
-					System.out.println("i="+i+"::j="+j);
-				}
-				if(v1.isRightOpen()){
-					if( v2.getStartTime()<=v1.getEndTime()+1 && v1.getEndTime()<v2.getEndTime() && v1.intersection(v2).size()>=m){
-						//merge two convoys
-						v1.setExtended(true);
-						Convoy vext = new Convoy(v1.intersection(v2),v1.getStartTime(),v2.getEndTime());
-						vext.setLeftOpen(v1.isLeftOpen());vext.setRightOpen(v2.isRightOpen());
-						if(vext.isOpen()){
-							VpccNext = updateVpccResult(VpccNext, vext);
-						}
-						else if(vext.lifetime()>=k){
-							VpccResult = updateVpccResult(VpccResult, vext);
-						}
-						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
-					}
-				}
-				if(v1.isLeftOpen()){
-					if( v2.getStartTime()<v1.getStartTime() && v1.getStartTime()<=v2.getEndTime()+1 && v1.intersection(v2).size()>=m){
-						//merge two convoys
-						System.out.println("Came to left open");
-						Convoy vext = new Convoy(v1.intersection(v2),v2.getStartTime(),v1.getEndTime());
-						vext.setLeftOpen(v2.isLeftOpen());vext.setRightOpen(v1.isRightOpen());
-						if(vext.isOpen()){
-							VpccNext = updateVpccResult(VpccNext, vext);
-						}
-						else if(vext.lifetime()>=k){
-							VpccResult = updateVpccResult(VpccResult, vext);
-						}
-						if(v1.isSubset(v2)){v1.setAbsorbed(true);}
-					}
-				}
-			}
-			if(!v1.isAbsorbed() && v1.lifetime() >= k){
-				v1.setClosed();
-				VpccResult = updateVpccResult(VpccResult, v1);
-			}
-		}
-		if(VpccNext.size()>0){
-			VpccNext = finalMerge(VpccNext,++iteration);
-			for(Convoy v:VpccNext){
-				VpccResult = updateVpccResult(VpccResult,v);
-			}
-		}
-		return VpccResult;
-	}
 	
+	@Override
+	protected void cleanup(Context context) throws IOException,
+			InterruptedException {
+		reducer.finalMerge();
+		result=reducer.getVpccResult();
+		int id=0;
+		for(Convoy v:result){
+			context.write(new IntWritable(id++), new Text(v.toString()));
+		}
+		System.out.println("Total convoys = "+result.size());
+		System.out.println("Total reducer calls = "+reducerCount);
+		List<Convoy> VpccVcoda = runVcoda();
+		filterClosedConvoysinMerge(result, VpccVcoda);
+		System.out.println("**************Vpccn Remaining Convoys*************");
+		printConvoyList(VpccMerge);
+		System.out.println("**************Vpcc Remaining Convoys*************");
+		printConvoyList(VpccVcoda);
+		super.cleanup(context);
+	}
+
 	public static List<Convoy> updateVpccResult(List<Convoy> VpccResult, Convoy vnew){
 		boolean added=false;
 		List<Convoy> toRemove=new ArrayList<Convoy>();

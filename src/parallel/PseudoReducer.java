@@ -9,6 +9,14 @@ public class PseudoReducer {
 	List<Convoy> VpccLeft = new ArrayList<Convoy>();
 	List<Convoy> VpccRight = new ArrayList<Convoy>();
 	List<Convoy> VpccResult = new ArrayList<Convoy>();
+	public List<Convoy> getVpccResult() {
+		return VpccResult;
+	}
+
+	public void setVpccResult(List<Convoy> vpccResult) {
+		VpccResult = vpccResult;
+	}
+
 	int currentMergeTime=-1;
 	int mergeTime;
 	int count; //counter for comparisons

@@ -174,6 +174,17 @@ public class Convoy {
 		rightOpen=false;
 	}
 	
+	public int getMergeTime(){
+		if(isLeftOpen()){
+			return startTime-1;
+		}
+		else if(isRightOpen()){
+			return endTime;
+		}
+		else
+			return -1;
+	}
+	
 
 	@Override
 	public boolean equals(Object obj) {

@@ -45,13 +45,8 @@ public class ConvoyReducer extends Reducer<IntWritable,Text,Text,IntWritable> {
 		for (Text val : values) {
 			System.out.println(val);
 			v = new Convoy(val.toString().split(","));
-//			if(!v.isOpen()){
-//				context.write(val, one);
-//			}
-//			else{
-				VpccMerge.add(v);
-				count++;
-//			}
+			VpccMerge.add(v);
+			count++;
 		}
 		System.out.println("Convoys received at reducer = "+count);
 		List<Convoy> VpccVcoda = runVcoda();
