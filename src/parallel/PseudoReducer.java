@@ -83,6 +83,7 @@ public class PseudoReducer {
 						VpccResult = updateVpccResult(VpccResult, vext);
 					}
 					if(v1.isSubset(v2)){v1.setAbsorbed(true);}
+					if(v2.isSubset(v1)){v2.setAbsorbed(true);}   ///////////////new line
 				}
 			}
 			if(!v1.isAbsorbed() && v1.lifetime() >= k){
@@ -90,6 +91,19 @@ public class PseudoReducer {
 				VpccResult = updateVpccResult(VpccResult, v1);
 			}
 		}
+		//////new code untested
+		for(int j=0; j<VpccRight.size(); j++){
+			Convoy v2 = VpccRight.get(j);
+			if(!v2.isAbsorbed()){
+				if(v2.isRightOpen()){
+					VpccNextLeft.add(v2);
+				}
+				else if(v2.lifetime()>=k){
+					VpccResult = updateVpccResult(VpccResult, v2);
+				}
+			}
+		}
+		////end new code untested
 		VpccLeft = VpccNextLeft;
 		VpccRight = VpccNextRight;
 	}
