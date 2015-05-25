@@ -32,6 +32,7 @@ public class Vcoda {
 
 	public static void main(String[] args) throws IOException {
 		
+
 //		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath2, m-1, e, 2);
 //		
 //		//*****************Apply PCCD algo on the list of clusters**************************************
@@ -42,6 +43,7 @@ public class Vcoda {
 		List<Convoy> Vpcc = PCCD(inputFilePath2,k,m);
 //		//*******Print Vpcc************
 		Utils.writeConvoys(Vpcc, outputFilePath2);
+
 
 	}
 	
@@ -132,7 +134,7 @@ public class Vcoda {
 		List<Convoy> V = new ArrayList<Convoy>();
 		List<Convoy> Vpcc = new ArrayList<Convoy>();
 		List<Convoy> C = null;
-		for(int t=minTime;t<=maxTime;t++){//maxTime;t++){
+		for(int t=minTime;t<=2875;t++){//maxTime;t++){
 			List<Cluster<PointWrapper>> CC = clusterMap.get(t);
 			Vnext=new ArrayList<Convoy>();
 			if(CC!=null && CC.size()>0){
