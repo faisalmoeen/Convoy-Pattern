@@ -8,13 +8,16 @@ public class PointWrapper implements Clusterable{
 
 	private int oid;
 	private double[] point = new double[]{0,0};
+	private long time;
+	
 	public PointWrapper() {
 	}
 	
-	public PointWrapper(int oid,double x,double y) {
+	public PointWrapper(int oid,double x,double y, long time) {
 		this.oid=oid;
 		this.point[0]=x;
 		this.point[1]=y;
+		this.time = time;
 	}
 
 	@Override
@@ -46,6 +49,15 @@ public class PointWrapper implements Clusterable{
 	public void setY(double y) {
 		this.point[1] = y;
 	}
+	
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
+	}
+
 
 	@Override
 	public String toString() {

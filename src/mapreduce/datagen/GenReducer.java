@@ -37,7 +37,7 @@ public class GenReducer extends Reducer<PartitionTimePair,Text,Text,NullWritable
 		int count = 0;
 		try {
 			for (Text val : values) {
-				System.out.println(val);
+//				System.out.println(val);
 				context.write(val, null);
 			}
 		} catch (Exception e) {

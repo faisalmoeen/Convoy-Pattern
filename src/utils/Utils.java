@@ -42,7 +42,7 @@ public class Utils {
 		int closedStatus=2;
 		int row=0;
 		for(Convoy v : Vpcc){
-			System.out.println(v);
+			System.out.print(v);
 			if(v.isLeftOpen() && v.isRightOpen()){
 				closedStatus=0;
 			}else if(!v.isLeftOpen() && !v.isRightOpen()){

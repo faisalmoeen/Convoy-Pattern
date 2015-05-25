@@ -15,15 +15,15 @@ public class Convoy {
 	}
 	
 	private List<Integer> objs = new ArrayList<Integer>();
-	private int startTime;
-	private int endTime;
+	private long startTime;
+	private long endTime;
 	private boolean extended=false;
 	private boolean absorbed=false;
 	private boolean matched=false;
 	private boolean rightOpen=false;
 	private boolean leftOpen=false;
 	
-	public int lifetime(){
+	public long lifetime(){
 		return endTime-startTime+1;
 	}
 	
@@ -64,11 +64,12 @@ public class Convoy {
 		for(PointWrapper p : pts){
 			convoy.addObject(p.getOid());
 		}
+		convoy.setTime(pts.get(0).getTime());
 		Collections.sort(convoy.getObjs());
 		return convoy;
 	}
 	
-	public Convoy(List<Integer> objs, int startTime, int endTime){
+	public Convoy(List<Integer> objs, long startTime, long endTime){
 		this.objs=objs;
 		this.startTime=startTime;
 		this.endTime=endTime;
@@ -83,9 +84,9 @@ public class Convoy {
 			this.objs.add(Integer.parseInt(c[i]));
 		}
 	}
-	public void setTime(int t){
-		this.startTime = t;
-		this.endTime = t;
+	public void setTime(long l){
+		this.startTime = l;
+		this.endTime = l;
 	}
 	public List<Integer> getObjs() {
 		return objs;
@@ -93,16 +94,16 @@ public class Convoy {
 	public void setObjs(List<Integer> objs) {
 		this.objs = objs;
 	}
-	public int getStartTime() {
+	public long getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(int startTime) {
+	public void setStartTime(long startTime) {
 		this.startTime = startTime;
 	}
-	public int getEndTime() {
+	public long getEndTime() {
 		return endTime;
 	}
-	public void setEndTime(int endTime) {
+	public void setEndTime(long endTime) {
 		this.endTime = endTime;
 	}
 
@@ -174,7 +175,7 @@ public class Convoy {
 		rightOpen=false;
 	}
 	
-	public int getMergeTime(){
+	public long getMergeTime(){
 		if(isLeftOpen()){
 			return startTime-1;
 		}

@@ -77,7 +77,7 @@ extends Mapper<Object, Text, PartitionTimePair, Text>{
 		if(tuple.t>maxTime){
 			maxTime = tuple.t;
 		}
-		System.out.println(count++);
+//		System.out.println(count++);
 	}
 	
 	@Override
@@ -99,7 +99,7 @@ extends Mapper<Object, Text, PartitionTimePair, Text>{
 					tuple.longi+=xShift;
 					tuple.oid+=oid;
 					partition = tuple.t/timeSpan;
-					System.out.println(partition+":"+tuple.t);
+//					System.out.println(partition+":"+tuple.t);
 					context.write(new PartitionTimePair(partition, tuple.t), new Text(tuple.toString()));
 				} catch (Exception e) {
 					e.printStackTrace();

@@ -29,7 +29,7 @@ public class GenJobController {
     conf.set("ts", args[4]);//Time shift per replication
     conf.set("xs", args[5]);//X shift per replication
     conf.set("ys", args[6]);//Y shift per replication
-    Job job = Job.getInstance(conf, "Distributed Convoy");
+    Job job = Job.getInstance(conf, "Data Generator");
     job.setJarByClass(GenJobController.class);
     job.setMapperClass(GenMapper.class);
 //    job.setCombinerClass(IntSumReducer.class);

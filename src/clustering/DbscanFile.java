@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -21,7 +22,83 @@ import utils.Utils;
 public class DbscanFile {
 
 	private HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new HashMap<Integer,List<Cluster<PointWrapper>>>();
+	private String inputFilePath;
+	private Reader csvData;
+	private Iterable<CSVRecord> records;
+	private Iterator<CSVRecord> iterator;
+	List<PointWrapper> clusterInput;
+	int currentTime;
+	CSVRecord record=null;
+	private List<Cluster<PointWrapper>> empty = new ArrayList<Cluster<PointWrapper>>();
 	public DbscanFile() {
+	}
+	public DbscanFile(String inputFilePath) throws FileNotFoundException {
+		File file = new File(inputFilePath);
+		int count=0;
+		if(!file.exists()){
+			throw new FileNotFoundException(inputFilePath);
+		}
+		csvData = null;
+		try {
+			csvData = new FileReader(file);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			records = CSVFormat.RFC4180.withHeader("oid","t","lat","long").parse(csvData);
+			iterator = records.iterator();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		clusterInput = new ArrayList<PointWrapper>();
+		currentTime=-1;
+	}
+	
+	public List<Cluster<PointWrapper>> getNextCluster(int m, double e, long t){
+		
+		if(iterator.hasNext()==false){
+			return null;	//null shows that no more data
+		}
+		if(currentTime>t){
+			return empty;
+		}
+		List<Cluster<PointWrapper>> clusterResults=null;
+		
+		DBSCANClusterer<PointWrapper> dbscan = new DBSCANClusterer<PointWrapper>(e, m);
+		
+		while(iterator.hasNext()) {
+			record = iterator.next();
+			currentTime = Double.valueOf(record.get("t")).intValue();
+			if(currentTime<t){
+				continue;
+			}
+			else if(currentTime==t){
+				PointWrapper p = new PointWrapper(Integer.parseInt(record.get("oid")),
+						Double.parseDouble(record.get("long")),
+						Double.parseDouble(record.get("lat")), Long.parseLong(record.get("t")));
+				clusterInput.add(p);
+			}
+			else if(currentTime>t){
+				if(clusterInput.size()>=m){
+					 clusterResults = dbscan.cluster(clusterInput);
+				}
+				clusterInput.clear();
+				break;
+			}
+		}
+		if(!iterator.hasNext()){
+			if(clusterInput.size()>=m){
+				 clusterResults = dbscan.cluster(clusterInput);
+			}
+			clusterInput.clear();
+		}
+		if(clusterResults!=null && clusterResults.size()!=0){
+			return clusterResults;
+		}
+		else{
+			return empty;
+		}
 	}
 	
 	public HashMap<Integer, List<Cluster<PointWrapper>>> DBSCAN(String inputFilePath,int m, double e, int numFiles) throws FileNotFoundException {
@@ -92,7 +169,7 @@ public class DbscanFile {
 			currentTime = Double.valueOf(record.get("t")).intValue();
 			PointWrapper p = new PointWrapper(Integer.parseInt(record.get("oid")),
 					Double.parseDouble(record.get("long")),
-					Double.parseDouble(record.get("lat")));
+					Double.parseDouble(record.get("lat")),currentTime);
 			clusterInput.add(p);
 		}
 		//for last cluster
