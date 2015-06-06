@@ -36,20 +36,26 @@ extends Mapper<Object, Text, IntWritable, Text>{
 	
 	List<PointWrapper> clusterInput;
 	DBSCANClusterer<PointWrapper> dbscan;
-	HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap;
-
+	VcodaNode vcodaNode;
+	int globalMinTime,globalMaxTime;
+	List<Convoy> Vpcc = null;
 
 	@Override
 	protected void setup(Context context) throws IOException,
 			InterruptedException {
+		long start = context.getCounter(ConvoyCounters.MAP_START).getValue();
+		if(start==0){
+			context.getCounter(ConvoyCounters.MAP_START).setValue(System.currentTimeMillis());
+		}
 		Configuration conf = context.getConfiguration();
 		m = Integer.parseInt(conf.get("m"));
 		k = Integer.parseInt(conf.get("k"));
 		e = Double.parseDouble(conf.get("e"));
+		globalMinTime = Integer.parseInt(conf.get("gMinTime"));
+		globalMaxTime = Integer.parseInt(conf.get("gMaxTime"));
 		clusterInput = new ArrayList<PointWrapper>();
 		dbscan = new DBSCANClusterer<PointWrapper>(e, m-1);
-		clusterMap = new HashMap<Integer,List<Cluster<PointWrapper>>>();
-
+		vcodaNode = new VcodaNode(globalMinTime, globalMaxTime);
 		super.setup(context);
 	}
 	
@@ -61,57 +67,56 @@ extends Mapper<Object, Text, IntWritable, Text>{
 		t = Integer.parseInt(str[1]);
 		lati = Double.parseDouble(str[2]);
 		longi = Double.parseDouble(str[3]);
-		addPointForClustering(oid, t, lati, longi);
-		
-	}
-	
-	private void addPointForClustering(int oid, int t, double lati, double longi){
-		if(currentTime!=-1 && t!=currentTime){
-			prevTime=currentTime;
+		if(currentTime==-1){
+			currentTime=t;
+		}
+		else if(t>currentTime){
 			if(clusterInput.size()>=m){
 				List<Cluster<PointWrapper>> clusterResults = dbscan.cluster(clusterInput);
-				if(clusterResults!=null && clusterResults.size()!=0){
-					for(int k=0;k<clusterResults.size();k++){
-						List<Integer> objs = Utils.clusterToConvoyList(clusterResults).get(k).getObjs();
-						Collections.sort(objs);
-					}
-					clusterMap.put(currentTime, clusterResults);
-				}
+				//run pccdnode
+				vcodaNode.PCCDNode(clusterResults, k, m, currentTime);
+				clusterInput.clear();
 			}
-			clusterInput.clear();
+			else{
+				vcodaNode.PCCDNode(null, k, m, currentTime);
+				clusterInput.clear();
+			}
 		}
-		currentTime = t;
-		PointWrapper p = new PointWrapper(oid,
-				longi,
-				lati);
+		
+		PointWrapper p = new PointWrapper(oid,longi,lati,t);
 		clusterInput.add(p);
+		
+		currentTime=t;
 	}
-
+	
 	@Override
 	protected void cleanup(Context context)
 			throws IOException, InterruptedException {
 		//for last cluster
 		if(clusterInput.size()>=m){
 			List<Cluster<PointWrapper>> clusterResults = dbscan.cluster(clusterInput);
-			System.out.println("clustering done");
-			clusterMap.put(currentTime, clusterResults);
+//			System.out.println("clustering done");
+			vcodaNode.PCCDNode(clusterResults, k, m, currentTime);
+			clusterInput.clear();
 		}
-		
+		else{
+			vcodaNode.PCCDNode(null, k, m, currentTime);
+			clusterInput.clear();
+		}
+		Vpcc = vcodaNode.finishAlgo(currentTime);
 		//*****************Apply PCCDNode algo on the list of clusters**************************************
-		if(clusterMap.size()!=0){
-			System.out.println(clusterMap.size());
-			int minTime=Collections.min(clusterMap.keySet());
-			int maxTime=Collections.max(clusterMap.keySet());
-			List<Convoy> Vpcc = VcodaNode.PCCDNode(clusterMap,k,m,minTime,maxTime,1,2874);
-			for(Convoy v:Vpcc){
-				context.write(one, new Text(v.isLeftOpen()+","+v.isRightOpen()+
-						","+v.getStartTime()+","+v.getEndTime()+
-						","+v.getObjs().toString().replace("[", "").replace("]", "").replace(" ", "")));
-			}
-			System.out.println("Convoys out from partition ("+minTime+"-"+maxTime+")"+Vpcc.size());
+		for(Convoy v:Vpcc){
+			context.write(one, new Text(v.isLeftOpen()+","+v.isRightOpen()+
+					","+v.getStartTime()+","+v.getEndTime()+
+					","+v.getObjs().toString().replace("[", "").replace("]", "").replace(" ", "")));
 		}
-		
+//		System.out.println("Convoys out from partition ("+minTime+"-"+maxTime+")"+Vpcc.size());
 		super.cleanup(context);
+		long end = context.getCounter(ConvoyCounters.MAP_END).getValue();
+		if(end==0 || System.currentTimeMillis()>end){
+			context.getCounter(ConvoyCounters.MAP_END).setValue(System.currentTimeMillis());
+			context.getCounter(ConvoyCounters.MAP_PHASE).setValue(context.getCounter(ConvoyCounters.MAP_END).getValue() - context.getCounter(ConvoyCounters.MAP_START).getValue());
+		}
 	}
 	
 	

@@ -6,7 +6,18 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,11 +28,14 @@ import java.util.List;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import utils.Utils;
+import utils.DBSCAN.DBSCANNlogN;
+import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
+import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.DbscanFile;
 import clustering.PointWrapper;
 
 
-public class Vcoda {
+public class VcodaNLogN {
 	static String inputFilePath="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/trucks273s.txt";
 	static String inputFilePath1="D:/data/scaled";
 	static String inputFilePath2="/home/faisal/Downloads/input/trucks273s.txt";
@@ -35,7 +49,7 @@ public class Vcoda {
 	static long totalCounter=0;
 	static DbscanFile dbscan;
 	
-	public Vcoda() {
+	public VcodaNLogN() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -55,13 +69,13 @@ public class Vcoda {
 		k = Integer.parseInt(args[3]);
 		e = Double.parseDouble(args[4]);
 		convoyMiningCounter = System.currentTimeMillis();
-		
-		//****************Convoy Mining**************
-		List<Convoy> Vpcc = PCCD(inputFilePath,k,m);
+		clusteringCounter = System.currentTimeMillis();
+		//****************Clustering**************
+		List<Convoy> Vpcc = NlogNClustering(inputFilePath,k,m);
 		//*******************************************
-		
+		clusteringCounter = System.currentTimeMillis() - clusteringCounter;
 		convoyMiningCounter = System.currentTimeMillis() - convoyMiningCounter;
-		
+		System.out.println("NlogN Clustering took = "+clusteringCounter+" ms");
 		//******************Print Vpcc***************
 		Utils.writeConvoys(Vpcc, outputFilePath);
 		//********************************************
@@ -80,9 +94,10 @@ public class Vcoda {
 		pw.close();
 	}
 	
+	
+	
 
-	public static List<Convoy> PCCD(String inputFilePath, int k, int m) throws FileNotFoundException{
-		List<Cluster<PointWrapper>> clusters=null;
+	public static List<Convoy> NlogNClustering(String inputFilePath, int k, int m) throws NumberFormatException, IOException{
 		dbscan = new DbscanFile(inputFilePath);
 //		int minTime=Collections.min(clusterMap.keySet());
 //		int maxTime=Collections.max(clusterMap.keySet());
@@ -90,14 +105,18 @@ public class Vcoda {
 		List<Convoy> Vnext = new ArrayList<Convoy>();
 		List<Convoy> V = new ArrayList<Convoy>();
 		List<Convoy> Vpcc = new ArrayList<Convoy>();
-		List<Convoy> C = null;
+		List<Convoy> C = new ArrayList<Convoy>();
 		List<Cluster<PointWrapper>> CC = null;
 		long t=1;
-		while((CC=dbscan.getNextCluster(m-1,e,t))!=null){//maxTime;t++){
-//			System.out.println("t="+t+" : No. of Clusters="+CC.size());
+		List<DoubleArray> points=null;
+		while((points=dbscan.getNextPoints(t))!=null){//maxTime;t++){
+			DBSCANNlogN algo = new DBSCANNlogN();  
+			List<ca.pfv.spmf.patterns.cluster.Cluster> clusters = algo.runAlgorithmOnArray(m, e, points);
+			//TODO: fill C with clusters
+//			System.out.println("t="+t+" : No. of Clusters="+clusters.size());
 			Vnext=new ArrayList<Convoy>();
-			if(CC!=null && CC.size()>0){
-				C = Utils.clusterToConvoyList(CC);
+			if(clusters!=null && clusters.size()>0){
+				C = Utils.clustersToConvoyList(clusters);
 			}
 			else{
 				t++;
@@ -138,6 +157,8 @@ public class Vcoda {
 			V=Vnext;
 			++t;
 //			System.out.println("ts = "+t+", |V| = "+V.size()+", |Vpcc| = "+Vpcc.size());
+//			System.out.println("No. of clusters = "+clusters.size());
+			//algo.printStatistics();
 		}
 		for(Convoy v:V){
 			if(v.lifetime()>=k){

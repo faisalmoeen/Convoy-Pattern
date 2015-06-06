@@ -123,10 +123,10 @@ public class PseudoReducer {
 	
 	private int getMergeTime(Convoy v){
 		if(v.isLeftOpen()){
-			return v.getStartTime()-1;
+			return (int) (v.getStartTime()-1);
 		}
 		else if(v.isRightOpen()){
-			return v.getEndTime();
+			return (int) v.getEndTime();
 		}
 		else
 			return -1;

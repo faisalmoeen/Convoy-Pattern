@@ -92,6 +92,7 @@ extends Mapper<Object, Text, PartitionTimePair, Text>{
 		int partition=0;
 		int oid=0;
 		for(int replication=1;replication<=nr;replication++){
+			System.out.println("replication="+replication);
 			for (Tuple tuple:tupleList){
 				try {
 					tuple.t+=timeShift;

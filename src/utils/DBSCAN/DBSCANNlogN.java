@@ -2,6 +2,7 @@ package utils.DBSCAN;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,8 +15,10 @@ import ca.pfv.spmf.datastructures.kdtree.KDTree;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import ca.pfv.spmf.tools.MemoryLogger;
+import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
+import ca.pfv.spmf.algorithms.clustering.dbscan.DoubleArrayDBS;
 
-public class DBSCANNlogN {
+public class DBSCANNlogN extends AlgoDBSCAN{
 
 	// The list of clusters generated
 		protected List<Cluster> clusters = null;
@@ -30,7 +33,7 @@ public class DBSCANNlogN {
 		DistanceFunction distanceFunction = new DistanceEuclidian(); 
 		
 		/* This KD-Tree is used to index the data points for fast access to points in the epsilon radius*/
-		KDTree kdtree;
+		MyKDTree kdtree;
 
 		/**
 		 * Default constructor
@@ -39,9 +42,11 @@ public class DBSCANNlogN {
 			
 		}
 		
-		public DBSCANNlogN(String fileName) { 
-			reader = new BufferedReader(new FileReader(inputFile));
+		public DBSCANNlogN(String fileName) throws FileNotFoundException { 
+			reader = new BufferedReader(new FileReader(fileName));
 		}
+		
+
 		
 		/**
 		 * Run the DBSCAN algorithm
@@ -52,7 +57,7 @@ public class DBSCANNlogN {
 		 * @return a list of clusters (some of them may be empty)
 		 * @throws IOException exception if an error while writing the file occurs
 		 */
-		public List<Cluster> runAlgorithm(int minPts, double epsilon, String separator) throws NumberFormatException, IOException {
+		public List<Cluster> runAlgorithmOnArray(int minPts, double epsilon, List<DoubleArray> points) throws NumberFormatException, IOException {
 			
 			// record the start time
 			startTimestamp =  System.currentTimeMillis();
@@ -60,41 +65,10 @@ public class DBSCANNlogN {
 			numberOfNoisePoints =0;
 			
 			// Structure to store the vectors from the file
-			List<DoubleArray> points = new ArrayList<DoubleArray>();
-			
-			// read the vectors from the input file
-			if(reader==null){
-				
-			}
-			String line;
-			// for each line until the end of the file
-			while (((line = reader.readLine()) != null)) {
-				// if the line is  a comment, is  empty or is a
-				// kind of metadata
-				if (line.isEmpty() == true ||
-						line.charAt(0) == '#' || line.charAt(0) == '%'
-								|| line.charAt(0) == '@') {
-					continue;
-				}
-				// split the line by spaces
-				String[] lineSplited = line.split(separator);
-				// create a vector of double
-				double [] vector = new double[lineSplited.length];
-				// for each value of the current line
-				for (int i=0; i< lineSplited.length; i++) { 
-					// convert to double
-					double value = Double.parseDouble(lineSplited[i]);
-					// add the value to the current vector
-					vector[i] = value;
-				}
-				// add the vector to the list of vectors
-				points.add(new DoubleArrayDBS(vector));
-			}
-			// close the file
-			reader.close();
+//			List<DoubleArray> points = new ArrayList<DoubleArray>();
 			
 			// build kd-tree
-			kdtree = new KDTree();
+			kdtree = new MyKDTree();
 			kdtree.buildtree(points);
 			
 			// For debugging, you can print the KD-Tree by uncommenting the following line:
@@ -107,7 +81,7 @@ public class DBSCANNlogN {
 			// For each point in the dataset
 			for(DoubleArray point: points) {
 				// if the node is already visited, we skip it
-				DoubleArrayDBS pointDBS = (DoubleArrayDBS) point;
+				MyDoubleArrayDBS pointDBS = (MyDoubleArrayDBS) point;
 				if(pointDBS.visited == true) {
 					continue;
 				}
@@ -144,7 +118,8 @@ public class DBSCANNlogN {
 			// return the clusters
 			return clusters;
 		}
-
+		
+		
 		/**
 		 * The DBScan expandCluster() method
 		 * @param currentPoint the current point
@@ -153,14 +128,14 @@ public class DBSCANNlogN {
 		 * @param epsilon the epsilon parameter
 		 * @param minPts the minPts parameter
 		 */
-		private void expandCluster(DoubleArrayDBS currentPoint,
+		private void expandCluster(MyDoubleArrayDBS currentPoint,
 				List<DoubleArray> neighboors, Cluster cluster, double epsilon, int minPts) {	
 			// add the current point to the cluster
 			cluster.addVector(currentPoint);
 			
 			// for each neighboor
 			for(DoubleArray newPoint: neighboors) {
-				DoubleArrayDBS newPointDBS = (DoubleArrayDBS) newPoint;
+				MyDoubleArrayDBS newPointDBS = (MyDoubleArrayDBS) newPoint;
 				
 				// if this point has not been visited yet
 				if(newPointDBS.visited == false) {
@@ -175,6 +150,7 @@ public class DBSCANNlogN {
 					if(newNeighboors.size() >= minPts - 1) { // - 1 because we don't count the point itself in its neighborood
 						expandCluster(newPointDBS, newNeighboors, cluster, epsilon, minPts);
 					}else {
+						cluster.addVector(newPointDBS);
 						// it is noise
 						numberOfNoisePoints++;
 					}

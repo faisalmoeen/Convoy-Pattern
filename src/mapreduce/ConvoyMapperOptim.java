@@ -61,6 +61,12 @@ extends Mapper<Object, Text, IntWritable, Text>{
 		t = Integer.parseInt(str[1]);
 		lati = Double.parseDouble(str[2]);
 		longi = Double.parseDouble(str[3]);
+		if(currentTime==-1){
+			currentTime=t;
+		}
+		else if(t>currentTime){
+			
+		}
 		addPointForClustering(oid, t, lati, longi);
 		
 	}
@@ -83,7 +89,7 @@ extends Mapper<Object, Text, IntWritable, Text>{
 		currentTime = t;
 		PointWrapper p = new PointWrapper(oid,
 				longi,
-				lati);
+				lati,t);
 		clusterInput.add(p);
 	}
 
@@ -102,9 +108,9 @@ extends Mapper<Object, Text, IntWritable, Text>{
 			System.out.println(clusterMap.size());
 			int minTime=Collections.min(clusterMap.keySet());
 			int maxTime=Collections.max(clusterMap.keySet());
-			List<Convoy> Vpcc = VcodaNode.PCCDNode(clusterMap,k,m,minTime,maxTime,1,2874);
+			List<Convoy> Vpcc = new VcodaNode().PCCDNode(clusterMap,k,m,minTime,maxTime,1,2874);
 			for(Convoy v:Vpcc){
-				context.write(new IntWritable(v.getMergeTime()), new Text(v.isLeftOpen()+","+v.isRightOpen()+
+				context.write(new IntWritable((int)v.getMergeTime()), new Text(v.isLeftOpen()+","+v.isRightOpen()+
 						","+v.getStartTime()+","+v.getEndTime()+
 						","+v.getObjs().toString().replace("[", "").replace("]", "").replace(" ", "")));
 			}
