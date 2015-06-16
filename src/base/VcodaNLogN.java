@@ -130,7 +130,7 @@ public class VcodaNLogN {
 			}
 			for(Convoy c : C){
 				c.setMatched(false);c.setAbsorbed(false);
-				System.out.println(c);
+//				System.out.println(c);
 			}
 			for(Convoy v : V){
 				v.setExtended(false);v.setAbsorbed(false);
