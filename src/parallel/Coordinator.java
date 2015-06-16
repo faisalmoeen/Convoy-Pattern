@@ -270,7 +270,7 @@ public class Coordinator {
 			System.out.println(clusterMap.size());
 			int minTime=Collections.min(clusterMap.keySet());
 			int maxTime=Collections.max(clusterMap.keySet());
-			List<Convoy> Vpcc = VcodaNode.PCCDNode(clusterMap,k,m,minTime,maxTime,58,2874);
+			List<Convoy> Vpcc = new VcodaNode().PCCDNode(clusterMap,k,m,minTime,maxTime,58,2874);
 			VpccList.add(Vpcc);
 			
 			//*******Print Vpcc************

@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class ConvoyJobController {
+public class ConvoyJobWithMRSplits {
 
 	public static void main(String[] args) throws Exception {
 		File f= new File(args[0]);
@@ -32,13 +32,13 @@ public class ConvoyJobController {
 		conf.set("gMinTime", args[5]);
 		conf.set("gMaxTime", args[6]);
 		conf.set("mapreduce.map.output.compress", "false");
-		conf.set("mapred.max.split.size", "3000000000");
+//		conf.set("mapred.max.split.size", "3000000000");
 //		conf.set("mapred.max.split.size", "300000");
-		conf.set("mapred.min.split.size", "3000000000");
-		conf.set("mapred.min.split.size", "300000");
+//		conf.set("mapred.min.split.size", "3000000000");
+//		conf.set("mapred.min.split.size", "300000");
 		conf.set("output.dir", args[1]);
 		Job job = Job.getInstance(conf, "Distributed Convoy");
-		job.setJarByClass(ConvoyJobController.class);
+		job.setJarByClass(ConvoyJobWithMRSplits.class);
 		job.setMapperClass(ConvoyMapper.class);
 		//    job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(ConvoyReducer.class);
@@ -47,13 +47,13 @@ public class ConvoyJobController {
 		job.setMapOutputValueClass(Text.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(Text.class);
-//		job.setInputFormatClass(CustomTemporalFileInputFormat.class);
+		job.setInputFormatClass(CustomTemporalFileInputFormat.class);
 
 //		Counters c = job.getCounters(); 
 //		c.findCounter(ConvoyCounters.JOB_START).setValue(System.currentTimeMillis());
 
-		FileInputFormat.setInputDirRecursive(job, true);
-		FileInputFormat.addInputPath(job, new Path(args[0]));
+		CustomTemporalFileInputFormat.setInputDirRecursive(job, true);
+		CustomTemporalFileInputFormat.addInputPath(job, new Path(args[0]));
 		//    MultipleInputs.addInputPath(job,new Path(args[0]+"/"+s),TextInputFormat.class,ConvoyMapper.class);
 		//    for(String s:f.list()){
 		//    	MultipleInputs.addInputPath(job,new Path(args[0]+"/"+s),TextInputFormat.class,ConvoyMapper.class);

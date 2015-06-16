@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
+import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.PointWrapper;
 import base.Convoy;
 
@@ -27,6 +28,15 @@ public class Utils {
 		return V;
 	}
 	
+	public static List<Convoy> clustersToConvoyList(List<ca.pfv.spmf.patterns.cluster.Cluster> clusters){
+		List<Convoy> C = new ArrayList<Convoy>();
+		for(ca.pfv.spmf.patterns.cluster.Cluster cluster:clusters){
+			List<DoubleArray> vectors=cluster.getVectors();
+			Convoy v = Convoy.createConvoyFromDArray(vectors);
+			C.add(v);
+		}
+		return C;
+	}
 	public static void writeConvoys(List<Convoy> Vpcc, String outputFilePath) throws IOException{
 		Object [] FILE_HEADER = {"closedStatus","start","end"};
 		String NEW_LINE_SEPARATOR = "\n";
@@ -42,7 +52,7 @@ public class Utils {
 		int closedStatus=2;
 		int row=0;
 		for(Convoy v : Vpcc){
-			System.out.print(v);
+//			System.out.print(v);
 			if(v.isLeftOpen() && v.isRightOpen()){
 				closedStatus=0;
 			}else if(!v.isLeftOpen() && !v.isRightOpen()){
