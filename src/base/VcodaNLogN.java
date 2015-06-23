@@ -68,26 +68,25 @@ public class VcodaNLogN {
 		m = Integer.parseInt(args[2]);
 		k = Integer.parseInt(args[3]);
 		e = Double.parseDouble(args[4]);
-		convoyMiningCounter = System.currentTimeMillis();
-		clusteringCounter = System.currentTimeMillis();
+		convoyMiningCounter = 0;
+		clusteringCounter = 0;
 		//****************Clustering**************
 		List<Convoy> Vpcc = NlogNClustering(inputFilePath,k,m);
 		//*******************************************
-		clusteringCounter = System.currentTimeMillis() - clusteringCounter;
-		convoyMiningCounter = System.currentTimeMillis() - convoyMiningCounter;
+		
 		System.out.println("NlogN Clustering took = "+clusteringCounter+" ms");
 		//******************Print Vpcc***************
 		Utils.writeConvoys(Vpcc, outputFilePath);
 		//********************************************
 		
 		totalCounter = System.currentTimeMillis()-totalCounter;
-		convoyMiningCounter = convoyMiningCounter - dbscan.getClusteringTime();
+		
 		
 		PrintWriter pw = new PrintWriter(new File(outputFilePath.replace(".txt", "stats")+".txt"));
 		pw.println("Total time taken in ms : "+totalCounter);
 		System.out.println("Total time taken in ms : "+totalCounter);
-		pw.println("Clustering time in ms : "+dbscan.getClusteringTime());
-		System.out.println("Clustering time in ms : "+dbscan.getClusteringTime());
+		pw.println("Clustering time in ms : "+clusteringCounter);
+		System.out.println("Clustering time in ms : "+clusteringCounter);
 		pw.println("Convoy Mining time in ms : "+convoyMiningCounter);
 		System.out.println("Convoy Mining time in ms : "+convoyMiningCounter);
 		pw.flush();
@@ -108,10 +107,14 @@ public class VcodaNLogN {
 		List<Convoy> C = new ArrayList<Convoy>();
 		List<Cluster<PointWrapper>> CC = null;
 		long t=1;
+		long checkPoint=0;
 		List<DoubleArray> points=null;
 		while((points=dbscan.getNextPoints(t))!=null){//maxTime;t++){
 			DBSCANNlogN algo = new DBSCANNlogN();  
+			checkPoint=System.currentTimeMillis();
 			List<ca.pfv.spmf.patterns.cluster.Cluster> clusters = algo.runAlgorithmOnArray(m, e, points);
+			clusteringCounter+=(System.currentTimeMillis()-checkPoint);
+			checkPoint=System.currentTimeMillis();
 			//TODO: fill C with clusters
 //			System.out.println("t="+t+" : No. of Clusters="+clusters.size());
 			Vnext=new ArrayList<Convoy>();
@@ -159,6 +162,7 @@ public class VcodaNLogN {
 //			System.out.println("ts = "+t+", |V| = "+V.size()+", |Vpcc| = "+Vpcc.size());
 //			System.out.println("No. of clusters = "+clusters.size());
 			//algo.printStatistics();
+			convoyMiningCounter+=(System.currentTimeMillis()-checkPoint);
 		}
 		for(Convoy v:V){
 			if(v.lifetime()>=k){
