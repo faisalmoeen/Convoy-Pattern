@@ -71,7 +71,7 @@ public class MyKDTree {
 		if (points.size() == 0) {
 			return;
 		}
-		dimensionCount = points.get(0).size()-2;
+		dimensionCount = ((DoubleArray)points.get(0)).size()-2;
 
 		root = generateNode(0, points, 0, points.size() - 1); 
 	}

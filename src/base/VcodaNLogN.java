@@ -25,8 +25,10 @@ import java.util.List;
 
 
 
+
 import org.apache.commons.math3.ml.clustering.Cluster;
 
+import cuts.Cuts;
 import utils.Utils;
 import utils.DBSCAN.DBSCANNlogN;
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
@@ -81,6 +83,7 @@ public class VcodaNLogN {
 		
 		totalCounter = System.currentTimeMillis()-totalCounter;
 		
+		Cuts.printConvoyList(Vpcc);
 		
 		PrintWriter pw = new PrintWriter(new File(outputFilePath.replace(".txt", "stats")+".txt"));
 		pw.println("Total time taken in ms : "+totalCounter);

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hamcrest.core.IsInstanceOf;
 
+import utils.DBSCAN.Trajectory;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.PointWrapper;
 
@@ -69,7 +70,16 @@ public class Convoy {
 		Collections.sort(convoy.getObjs());
 		return convoy;
 	}
-	
+	public static Convoy createConvoyFromTraj(List<Trajectory> pts){
+		Convoy convoy = new Convoy();
+		for(Trajectory p : pts){
+			convoy.addObject(p.getOid());
+		}
+		convoy.setStartTime(pts.get(0).getStart());
+		convoy.setEndTime(pts.get(pts.size()-1).getEnd());
+		Collections.sort(convoy.getObjs());
+		return convoy;
+	}
 	
 	
 	public static Convoy createConvoyFromDArray(List<DoubleArray> vectors){

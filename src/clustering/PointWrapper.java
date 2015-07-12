@@ -2,10 +2,21 @@ package clustering;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
 
+import utils.DBSCAN.MyDoubleArrayDBS;
+import ca.pfv.spmf.patterns.cluster.DoubleArray;
+
+import com.goebl.simplify.Point;
+import com.vividsolutions.jts.geom.Coordinate;
 
 
-public class PointWrapper implements Clusterable{
 
+public class PointWrapper extends Coordinate implements Clusterable,Point{
+
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int oid;
 	private double[] point = new double[]{0,0};
 	private long time;
@@ -18,8 +29,12 @@ public class PointWrapper implements Clusterable{
 		this.point[0]=x;
 		this.point[1]=y;
 		this.time = time;
+		super.x = x;
+		super.y = y;
+		super.z = time;
 	}
 
+	
 	@Override
 	public double[] getPoint() {
 		return point;
@@ -40,6 +55,7 @@ public class PointWrapper implements Clusterable{
 
 	public void setX(double x) {
 		this.point[0] = x;
+		super.x = x;
 	}
 
 	public double getY() {
@@ -48,6 +64,7 @@ public class PointWrapper implements Clusterable{
 
 	public void setY(double y) {
 		this.point[1] = y;
+		super.y=y;
 	}
 	
 	public long getTime() {
@@ -62,10 +79,11 @@ public class PointWrapper implements Clusterable{
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return this.oid+":"+this.point[0]+","+this.point[1];
+		return this.oid+":t="+this.time+":"+this.point[0]+","+this.point[1];
 	}
 
-	
-	
+	public MyDoubleArrayDBS getDoubleArray(){
+		return new MyDoubleArrayDBS(new double[]{point[0],point[1],oid,time});
+	}
 
 }

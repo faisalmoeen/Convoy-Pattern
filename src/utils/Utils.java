@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
+import utils.DBSCAN.Trajectory;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.PointWrapper;
 import base.Convoy;
@@ -23,6 +24,16 @@ public class Utils {
 		for(Cluster<PointWrapper> c : C){
 			List<PointWrapper> pts = c.getPoints();
 			Convoy v = Convoy.createConvoy(pts);
+			V.add(v);
+		}
+		return V;
+	}
+	
+	public static List<Convoy> trajClusterToConvoyList(List<Cluster<Trajectory>> C){
+		List<Convoy> V = new ArrayList<Convoy>();
+		for(Cluster<Trajectory> c : C){
+			List<Trajectory> pts = c.getPoints();
+			Convoy v = Convoy.createConvoyFromTraj(pts);
 			V.add(v);
 		}
 		return V;
