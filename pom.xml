@@ -59,9 +59,10 @@
   		<version>2.6.0</version>
   	</dependency>
   	<dependency>
-  		<groupId>ca.pfv.spmf</groupId>
+  		<groupId>spmf</groupId>
   		<artifactId>spmf</artifactId>
-  		<version>0.96.16</version>
+  		<version>0.96</version>
+	<!--	<scope>system</scope> -->
   	</dependency>
   </dependencies>
 </project>
