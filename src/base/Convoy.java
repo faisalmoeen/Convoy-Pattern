@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hamcrest.core.IsInstanceOf;
+import org.joda.time.Interval;
 
 import utils.DBSCAN.Trajectory;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
@@ -227,6 +228,36 @@ public class Convoy {
 			return true;
 		}
 		return false;
+	}
+
+	public int objIntersectionSize(Convoy v2) {
+		if(v2==null){
+			return 0;
+		}
+		int count=0;
+		List<Integer> objs2 = v2.getObjs();
+		for(int obj : objs){
+			if(objs2.contains(obj)){
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public long temporalIntersectionSize(Convoy v2) {
+		if(v2 == null){
+			return 0;
+		}
+		long v2Start = v2.getStartTime();
+		long v2End = v2.getEndTime();
+		Interval i2 = new Interval(v2Start, v2End);
+		Interval i1 = new Interval(this.startTime, this.endTime);
+		if(i1.overlaps(i2)){
+			Interval i = i1.overlap(i2);
+			return i.getEndMillis()-i.getStartMillis()+1;
+		}
+		else
+			return 0;
 	}
 	
 	
