@@ -1,47 +1,28 @@
 package base;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import clustering.DbscanFileReader;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import cuts.Cuts;
 import utils.Utils;
 import utils.DBSCAN.DBSCANNlogN;
-import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
-import clustering.DbscanFile;
 import clustering.PointWrapper;
 
 
 public class VcodaNLogN {
-	static String inputFilePath="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/trucks273s.txt";
+	static String inputFilePath="/Users/faisalorakzai/ownCloud/PhD Work/working-folder/experiments/trucks_dataset/trucks273s.txt";
 	static String inputFilePath1="D:/data/scaled";
 	static String inputFilePath2="/home/faisal/Downloads/input/trucks273s.txt";
-	static String outputFilePath="C:/Users/buraq/Google Drive/Brussels/PhD Work/working-folder/experiments/trucks_dataset/convoysOutput.txt";
+	static String outputFilePath="/Users/faisalorakzai/ownCloud/PhD Work/working-folder/experiments/trucks_dataset/convoysOutput.txt";
 	static String outputFilePath2="/home/faisal/Downloads/output/vcoda.txt";
 	static int m=3;
 	static double e=0.0006; // Range: 1/10^4 to 6/10^4
@@ -49,7 +30,7 @@ public class VcodaNLogN {
 	static long clusteringCounter=0;
 	static long convoyMiningCounter=0;
 	static long totalCounter=0;
-	static DbscanFile dbscan;
+	static DbscanFileReader dbscan;
 	
 	public VcodaNLogN() {
 		// TODO Auto-generated constructor stub
@@ -57,7 +38,7 @@ public class VcodaNLogN {
 
 	public static void main(String[] args) throws IOException {
 		
-//		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath2, m-1, e, 2);
+//		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePath2, m-1, e, 2);
 //		
 //		//*****************Apply PCCD algo on the list of clusters**************************************
 //		List<Convoy> Vpcc = PCCD(clusterMap,k,m);
@@ -100,7 +81,7 @@ public class VcodaNLogN {
 	
 
 	public static List<Convoy> NlogNClustering(String inputFilePath, int k, int m) throws NumberFormatException, IOException{
-		dbscan = new DbscanFile(inputFilePath);
+		dbscan = new DbscanFileReader(inputFilePath);
 //		int minTime=Collections.min(clusterMap.keySet());
 //		int maxTime=Collections.max(clusterMap.keySet());
 //		System.out.println("minTime="+minTime+"::maxTime="+maxTime);

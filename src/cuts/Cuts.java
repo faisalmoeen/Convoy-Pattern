@@ -13,21 +13,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import utils.PointWrapperTemporalComparator;
 import utils.Utils;
 import utils.DBSCAN.DBSCANNlogN;
-import utils.DBSCAN.MyDoubleArrayDBS;
 import utils.DBSCAN.TrajDbscan;
 import utils.DBSCAN.Trajectory;
 import base.Convoy;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
-import clustering.DbscanFile;
+import clustering.DbscanFileReader;
 import clustering.PointWrapper;
 
 import com.goebl.simplify.Point;
@@ -57,7 +54,7 @@ public class Cuts {
 	static long checkPoint2=0;	
 	static long lambdaConvoyMining = 0;
 	static long refinement=0;
-	static DbscanFile dbscan;
+	static DbscanFileReader dbscan;
 	
 	
 	//	Simplify<Point> simplify = new Simplify<Point>(new MyPoint[0]);

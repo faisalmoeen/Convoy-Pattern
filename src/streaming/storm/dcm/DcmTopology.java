@@ -33,9 +33,6 @@ import backtype.storm.utils.Utils;
 
 import java.util.Map;
 
-/**
- * This is a basic example of a Storm topology.
- */
 public class DcmTopology {
 
 
@@ -48,6 +45,7 @@ public class DcmTopology {
 
     Config conf = new Config();
     conf.setDebug(true);
+//    conf.put("inputFilePath",args[0]);
 
     if (args != null && args.length > 0) {
       conf.setNumWorkers(3);
@@ -58,7 +56,7 @@ public class DcmTopology {
 
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
-      Utils.sleep(10000);
+      Utils.sleep(100000);
       cluster.killTopology("test");
       cluster.shutdown();
     }

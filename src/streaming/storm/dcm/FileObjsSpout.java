@@ -29,10 +29,14 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
+import ca.pfv.spmf.patterns.cluster.DoubleArray;
+import clustering.DbscanFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -40,6 +44,9 @@ import java.util.Random;
 public class FileObjsSpout extends BaseRichSpout {
     public static Logger LOG = LoggerFactory.getLogger(FileObjsSpout.class);
     boolean _isDistributed;
+    DbscanFileReader dbscanFileReader;
+    List<DoubleArray> points;
+    long t=0;
     SpoutOutputCollector _collector;
 
     public FileObjsSpout() {
@@ -52,6 +59,12 @@ public class FileObjsSpout extends BaseRichSpout {
 
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
+        try {
+            dbscanFileReader = new DbscanFileReader(conf.get("inputFilePath").toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void close() {
@@ -60,11 +73,12 @@ public class FileObjsSpout extends BaseRichSpout {
 
     public void nextTuple() {
         Utils.sleep(100);
+//        points = dbscanFileReader.getNextPoints(++t);
         final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
         final Random rand = new Random();
         final String word = words[rand.nextInt(words.length)];
         _collector.emit(new Values(word));
-        System.out.println("called");
+//        System.out.println(points.toString());
     }
 
     public void ack(Object msgId) {

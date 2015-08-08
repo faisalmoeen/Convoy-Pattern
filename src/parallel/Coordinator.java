@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import clustering.DbscanFileReader;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.junit.Test;
 
 import utils.Utils;
 import base.Convoy;
 import base.Vcoda;
-import clustering.DbscanFile;
 import clustering.PointWrapper;
 
 public class Coordinator {
@@ -261,7 +261,7 @@ public class Coordinator {
 		List<List<Convoy>> VpccList = new ArrayList<List<Convoy>>();
 		for(String file:f.list()){
 			String inputFilePath = inputFolder+"/"+file;
-			HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath, m-1, e,1);
+			HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePath, m-1, e,1);
 			
 			//*****************Apply PCCDNode algo on the list of clusters**************************************
 			if(clusterMap.size()==0){
@@ -339,7 +339,7 @@ public class Coordinator {
 	}
 	
 	public List<Convoy> runVcoda() throws IOException{
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePathVcoda, m-1, e,1);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePathVcoda, m-1, e,1);
 
 		//*****************Apply PCCD algo on the list of clusters**************************************
 		List<Convoy> Vpcc = Vcoda.PCCD(clusterMap,k,m);

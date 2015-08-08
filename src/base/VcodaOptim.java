@@ -1,24 +1,15 @@
 package base;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 
-
-
-
-
-
-
+import clustering.DbscanFileReader;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import utils.Utils;
-import clustering.DbscanFile;
 import clustering.PointWrapper;
 
 
@@ -37,7 +28,7 @@ public class VcodaOptim {
 
 	public static void main(String[] args) throws IOException {
 		
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath, m-1, e, 2);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePath, m-1, e, 2);
 		List<Convoy> Vpcc=experiment(clusterMap,k,m);
 		//*****************Apply PCCD algo on the list of clusters**************************************
 //		List<Convoy> Vpcc = PCCD(clusterMap,k,m);

@@ -6,19 +6,15 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.math3.genetics.TournamentSelection;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import base.Convoy;
-import cuts.Cuts;
 import utils.Utils;
 import utils.DBSCAN.DBSCANNlogN;
-import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
-import clustering.DbscanFile;
+import clustering.DbscanFileReader;
 import clustering.PointWrapper;
 
 
@@ -35,7 +31,7 @@ public class SVcodaNLogN {
 	static long clusteringCounter=0;
 	static long convoyMiningCounter=0;
 	static long totalCounter=0;
-	static DbscanFile dbscan;
+	static DbscanFileReader dbscan;
 	static List<Convoy> Vtrue;
 	static List<Convoy> Vtest;
 	
@@ -94,7 +90,7 @@ public class SVcodaNLogN {
 	
 
 	public static List<Convoy> mineConvoys(String inputFilePath, int k, int m, int samplingRate) throws NumberFormatException, IOException{
-		dbscan = new DbscanFile(inputFilePath);
+		dbscan = new DbscanFileReader(inputFilePath);
 //		int minTime=Collections.min(clusterMap.keySet());
 //		int maxTime=Collections.max(clusterMap.keySet());
 //		System.out.println("minTime="+minTime+"::maxTime="+maxTime);

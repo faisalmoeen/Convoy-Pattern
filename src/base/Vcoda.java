@@ -9,15 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 
 
-
-
-
-
-
+import clustering.DbscanFileReader;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
 import utils.Utils;
-import clustering.DbscanFile;
 import clustering.PointWrapper;
 
 
@@ -33,7 +28,7 @@ public class Vcoda {
 	static long clusteringCounter=0;
 	static long convoyMiningCounter=0;
 	static long totalCounter=0;
-	static DbscanFile dbscan;
+	static DbscanFileReader dbscan;
 	
 	public Vcoda() {
 		// TODO Auto-generated constructor stub
@@ -42,7 +37,7 @@ public class Vcoda {
 	public static void main(String[] args) throws IOException {
 		
 
-//		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePath2, m-1, e, 2);
+//		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePath2, m-1, e, 2);
 //		
 //		//*****************Apply PCCD algo on the list of clusters**************************************
 //		List<Convoy> Vpcc = PCCD(clusterMap,k,m);
@@ -86,7 +81,7 @@ public class Vcoda {
 
 	public static List<Convoy> PCCD(String inputFilePath, int k, int m) throws FileNotFoundException{
 		List<Cluster<PointWrapper>> clusters=null;
-		dbscan = new DbscanFile(inputFilePath);
+		dbscan = new DbscanFileReader(inputFilePath);
 //		int minTime=Collections.min(clusterMap.keySet());
 //		int maxTime=Collections.max(clusterMap.keySet());
 //		System.out.println("minTime="+minTime+"::maxTime="+maxTime);

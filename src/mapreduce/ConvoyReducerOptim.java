@@ -9,11 +9,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
 
 import parallel.PseudoReducer;
 import utils.Utils;
-import clustering.DbscanFile;
+import clustering.DbscanFileReader;
 import clustering.PointWrapper;
 import base.Convoy;
 import base.Vcoda;
@@ -125,7 +124,7 @@ public class ConvoyReducerOptim extends Reducer<IntWritable,Text,IntWritable,Tex
 	
 	
 	public List<Convoy> runVcoda() throws IOException{
-		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFile().DBSCAN(inputFilePathVcoda, m-1, e, 1);
+		HashMap<Integer,List<Cluster<PointWrapper>>> clusterMap = new DbscanFileReader().DBSCAN(inputFilePathVcoda, m-1, e, 1);
 
 		//*****************Apply PCCD algo on the list of clusters**************************************
 		List<Convoy> Vpcc = Vcoda.PCCD(clusterMap,k,m);

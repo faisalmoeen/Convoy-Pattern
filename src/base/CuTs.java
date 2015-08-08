@@ -11,10 +11,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import clustering.DbscanFile;
+import clustering.DbscanFileReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.simplify.DouglasPeuckerLineSimplifier;
 
 public class CuTs {
@@ -30,7 +29,7 @@ public class CuTs {
 	static long clusteringCounter=0;
 	static long convoyMiningCounter=0;
 	static long totalCounter=0;
-	static DbscanFile dbscan;
+	static DbscanFileReader dbscan;
 	static double delta = 10;
 	
 	public CuTs() {
