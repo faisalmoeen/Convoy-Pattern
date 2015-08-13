@@ -108,7 +108,6 @@ public class SVcodaNLogN {
 			List<ca.pfv.spmf.patterns.cluster.Cluster> clusters = algo.runAlgorithmOnArray(m, e, points);
 			clusteringCounter+=(System.currentTimeMillis()-checkPoint);
 			checkPoint=System.currentTimeMillis();
-			//TODO: fill C with clusters
 //			System.out.println("t="+t+" : No. of Clusters="+clusters.size());
 			Vnext=new ArrayList<Convoy>();
 			if(clusters!=null && clusters.size()>0){

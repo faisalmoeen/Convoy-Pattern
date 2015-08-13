@@ -35,18 +35,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 
 public class FileObjsSpout extends BaseRichSpout {
     public static Logger LOG = LoggerFactory.getLogger(FileObjsSpout.class);
     boolean _isDistributed;
-    DbscanFileReader dbscanFileReader;
-    List<DoubleArray> points;
+    StreamFileReader streamFileReader;
+    List<Double[]> points;
     long t=0;
+    long s=1; //sampling rate
     SpoutOutputCollector _collector;
 
     public FileObjsSpout() {
@@ -59,12 +57,13 @@ public class FileObjsSpout extends BaseRichSpout {
 
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
+        s = (Long)conf.get("s");
         try {
-            dbscanFileReader = new DbscanFileReader(conf.get("inputFilePath").toString());
+            streamFileReader = new StreamFileReader(conf.get("inputFilePath").toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        System.out.println("Opened FileObjsSpout");
     }
 
     public void close() {
@@ -72,13 +71,15 @@ public class FileObjsSpout extends BaseRichSpout {
     }
 
     public void nextTuple() {
-        Utils.sleep(100);
-//        points = dbscanFileReader.getNextPoints(++t);
-        final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
-        final Random rand = new Random();
-        final String word = words[rand.nextInt(words.length)];
-        _collector.emit(new Values(word));
-//        System.out.println(points.toString());
+        points = streamFileReader.getNextPointsAsDoubleArray(t+=s);
+        if(points==null){
+                Utils.sleep(1000);
+                return;
+        }
+        Values v = new Values(t);
+        v.add(points);
+        _collector.emit(v);
+//        System.out.println("t="+t);
     }
 
     public void ack(Object msgId) {
@@ -90,7 +91,7 @@ public class FileObjsSpout extends BaseRichSpout {
     }
 
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("word"));
+        declarer.declare(new Fields("time","points"));
     }
 
     @Override

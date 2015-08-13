@@ -3,6 +3,11 @@ package utils.DBSCAN;
 
 import ca.pfv.spmf.algorithms.clustering.dbscan.DoubleArrayDBS;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import org.apache.commons.lang.ArrayUtils;
 
 /* This file is copyright (c) 2008-2015 Philippe Fournier-Viger
 * 
@@ -26,7 +31,7 @@ import ca.pfv.spmf.patterns.cluster.DoubleArray;
 * 
  * @author Philippe Fournier-Viger
  */
-public class MyDoubleArrayDBS extends DoubleArrayDBS{
+public class MyDoubleArrayDBS extends DoubleArrayDBS implements KryoSerializable{
 	
 	boolean visited = false;
 
@@ -38,4 +43,17 @@ public class MyDoubleArrayDBS extends DoubleArrayDBS{
 		super(data);
 	}
 
+    public MyDoubleArrayDBS(Double[] data) {
+        super(ArrayUtils.toPrimitive(data));
+    }
+
+	@Override
+	public void write(Kryo kryo, Output output) {
+
+	}
+
+	@Override
+	public void read(Kryo kryo, Input input) {
+
+	}
 }

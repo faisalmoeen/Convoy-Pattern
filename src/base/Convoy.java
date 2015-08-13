@@ -1,4 +1,5 @@
 package base;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -12,7 +13,7 @@ import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.PointWrapper;
 
 
-public class Convoy {
+public class Convoy implements Serializable{
 
 	public Convoy() {
 	}
@@ -25,7 +26,8 @@ public class Convoy {
 	private boolean matched=false;
 	private boolean rightOpen=false;
 	private boolean leftOpen=false;
-	
+
+
 	public long lifetime(){
 		return endTime-startTime+1;
 	}

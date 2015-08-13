@@ -2,12 +2,15 @@ package utils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math3.ml.clustering.Cluster;
 
+import utils.DBSCAN.MyDoubleArrayDBS;
 import utils.DBSCAN.Trajectory;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import clustering.PointWrapper;
@@ -27,6 +30,20 @@ public class Utils {
 			V.add(v);
 		}
 		return V;
+	}
+	
+	public static List<DoubleArray> toArrayDBS(List<Double[]> doubleArrayList){
+        List<DoubleArray> dbsArray = new ArrayList<>();
+        Double[] doubles=null;
+        Iterator<Double[]> i = doubleArrayList.iterator();
+		while (i.hasNext()) {
+            doubles = i.next();
+            double[] primitives = ArrayUtils.toPrimitive(doubles);
+            MyDoubleArrayDBS myDoubleArrayDBS = new MyDoubleArrayDBS(primitives);
+			dbsArray.add(myDoubleArrayDBS);
+		}
+
+		return dbsArray;
 	}
 	
 	public static List<Convoy> trajClusterToConvoyList(List<Cluster<Trajectory>> C){

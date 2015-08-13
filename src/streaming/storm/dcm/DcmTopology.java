@@ -35,30 +35,46 @@ import java.util.Map;
 
 public class DcmTopology {
 
+    public static String inputFilePath="/Users/faisalorakzai/ownCloud/" +
+            "PhD Work/working-folder/experiments/trucks_dataset/trucks273s.txt";
+    public static double m = 3;
+    public static long k = 180;
+    public static double e = 0.0006;
+    public static int s = 1; //sampling rate
 
-  public static void main(String[] args) throws Exception {
-    TopologyBuilder builder = new TopologyBuilder();
+    public static void main(String[] args) throws Exception {
+        TopologyBuilder builder = new TopologyBuilder();
 
-    builder.setSpout("source", new FileObjsSpout(), 10);
-    builder.setBolt("clustering", new ClusteringBolt(), 3).shuffleGrouping("source");
-    builder.setBolt("merging", new MergingBolt(), 2).shuffleGrouping("clustering");
+        builder.setSpout("source", new FileObjsSpout(), 1);
+        builder.setBolt("clustering", new ClusteringBolt(), 3).shuffleGrouping("source");
+        builder.setBolt("merging", new MergingBolt(), 1).shuffleGrouping("clustering");
 
-    Config conf = new Config();
-    conf.setDebug(true);
-//    conf.put("inputFilePath",args[0]);
+        Config conf = new Config();
+//        conf.setDebug(true);
+//        conf.put(Config.TOPOLOGY_DEBUG, true);
+        conf.put("inputFilePath",inputFilePath);
+        conf.put("m",m);
+        conf.put("k",k);
+        conf.put("e",e);
+        conf.put("s",s);
 
-    if (args != null && args.length > 0) {
-      conf.setNumWorkers(3);
+        if (args != null && args.length > 0) {
+            conf.setNumWorkers(4);
 
-      StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
+            StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
+        }
+        else {
+
+            System.out.println("Initiate Cluster");
+            LocalCluster cluster = new LocalCluster();
+            System.out.println("Cluster Initiated");
+            System.out.println("Start Time = " + System.currentTimeMillis());
+            conf.put("startTime",System.currentTimeMillis());
+            cluster.submitTopology("test", conf, builder.createTopology());
+            System.out.println("Topology Submitted");
+            Utils.sleep(100000);
+            cluster.killTopology("test");
+            cluster.shutdown();
+        }
     }
-    else {
-
-      LocalCluster cluster = new LocalCluster();
-      cluster.submitTopology("test", conf, builder.createTopology());
-      Utils.sleep(100000);
-      cluster.killTopology("test");
-      cluster.shutdown();
-    }
-  }
 }
