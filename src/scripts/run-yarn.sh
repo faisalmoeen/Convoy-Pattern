@@ -2,6 +2,9 @@
 
 
 DATASETS=(trucks-d brink-d tdrive-d)
+trucks_time_offsets={2 2875}
+tdrive_time_offsets={0 53328}
+brink_time_offsets={2 20000}
 CLUSTERING_EXP_RESULT=clustering_exps.txt
 SPARE_EXP_RESULT=spare_exps.txt
 CORES=(16 14 12 10 8 6 4 2)
@@ -92,3 +95,6 @@ done
 done
 done
 done
+
+
+java -cp target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits /user/faisal/datasets/trucks-d /user/faisal/output/dcm-mr/trucks-d 6 180 0.00006
