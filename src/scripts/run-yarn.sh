@@ -37,7 +37,7 @@ do
     start=$(date +%s%3N)
     echo $dataset,${e},${m},${k}
     hdfs dfs -rm -r ${OUT_DIR}/${dataset}/${m}_${k}_${e}
-    hadoop jar target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits ${IN_DIR}/${dataset} ${OUT_DIR}/${dataset}/${m}_${k}_${e} \
+    hadoop jar ../../target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits ${IN_DIR}/${dataset} ${OUT_DIR}/${dataset}/${m}_${k}_${e} \
     ${m} ${k} ${e} ${time_offsets[${dataset}_start]} ${time_offsets[${dataset}_end]}
     end=$(date +%s%3N)
     echo $dataset,${e},${m},${k},${core},$(($end-$start))
