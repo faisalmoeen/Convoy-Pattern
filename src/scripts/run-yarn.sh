@@ -17,9 +17,9 @@ OUT_DIR=/user/faisal/output
 
 #===============================================DCM_MR============================================
 
-E=(0.000060) #eps for DBSCAN
-M=(6) #min num of objs in a cluster
-K=(180)
+E=(0.0006 0.00006 0.000006) #eps for DBSCAN
+M=(3 6 9) #min num of objs in a cluster
+K=(200 400 600 800 1000 1200)
 
 
 rm ${DCM_MR_EXP_RESULT}
@@ -48,5 +48,5 @@ done
 done
 
 
-java -cp target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits /user/faisal/datasets/trucks-d /user/faisal/output/dcm-mr/trucks-d
-hadoop jar target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits /user/faisal/datasets/trucks-d /user/faisal/output/trucks-d/DCM 6 180 0.00006 2 2875
+#java -cp target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits /user/faisal/datasets/trucks-d /user/faisal/output/dcm-mr/trucks-d
+#hadoop jar target/DistributedConvoy-0.0.1-SNAPSHOT.jar mapreduce.ConvoyJobNlognMRSplits /user/faisal/datasets/trucks-d /user/faisal/output/trucks-d/DCM 6 180 0.00006 2 2875
