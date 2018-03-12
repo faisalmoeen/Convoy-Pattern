@@ -2,3 +2,4 @@
 /.settings/
 /DistributedConvoy.iml
 /target/.DS_Store
+/target/classes
